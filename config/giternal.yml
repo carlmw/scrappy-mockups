@@ -1,0 +1,3 @@
+qunit:
+    repo: git://github.com/jquery/qunit.git
+    path: tests
