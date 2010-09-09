@@ -12,113 +12,201 @@
 	<ol id="qunit-tests"></ol>
 	<script>
 	(function(){	
-	HTMLElement.prototype.simulate = function(type) {
+	HTMLElement.prototype.simulate = function(type, opts) {
+		var p = {
+			screenX: 0,
+			screenY: 0,
+			clientX: 0,
+			clientY: 0
+		};
+		
+		if(opts){
+			var prop;
+			for(prop in opts){
+				p[prop] = opts[prop];
+			}
+		}
 		var evt = this.ownerDocument.createEvent('MouseEvents');
-		evt.initMouseEvent(type, true, true, this.ownerDocument.defaultView, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+		evt.initMouseEvent(type, true, true, this.ownerDocument.defaultView, 1, p.screenX, p.screenY, p.clientX, p.clientY, false, false, false, false, 0, null);
 		this.dispatchEvent(evt);
 	};
 
+	// Constructor
 	module('Constructor', {teardown: function(){ Slide.resetAll(); }});
 
 	test('Returns instance', function(){
+		expect(1);
+		
 		var slide = new Slide('test.png');
 
 		ok(slide instanceof Slide, 'should return an instance of Slide');
 	});
 
 	test('Loading first image', function(){
+		expect(1);
+		
 		new Slide('test.png');
-		var img = document.getElementsByTagName('img')[0];
+		var img = document.getElementById('slide')
 
 		equals(img.getAttribute('src'), 'test.png', 'should update the src of the image');
 	});
 
-	module('.click', {teardown: function(){ Slide.resetAll(); }});
+	// .click()
+	module('.click()', {teardown: function(){ Slide.resetAll(); }});
 
 	test('Returns instance', function(){
+		expect(1);
+		
 		var slide = new Slide('test.png');
 
 		ok((slide instanceof Slide), 'should return an instance of Slide');
 	});
 
 	test('Click triggered', function(){
+		expect(1);
+		
 		new Slide('test.png')
 			.click()
 				.open('test2.png');
-
-		var img = document.getElementsByTagName('img')[0];
+		var img = document.getElementById('slide')
 		img.simulate('click');
+		
 		equals(img.getAttribute('src'), 'test2.png', 'should update the src of the image');
 	});
 
-	module('.pause', {teardown: function(){ Slide.resetAll(); }});
+	test('Clicked hotspot', function(){
+		expect(1);
+		
+		new Slide('test.png')
+			.click(10, 10, 10, 10)
+			.open('test2.png');
+		var img = document.getElementById('slide')
+		img.simulate('click', {
+			clientX: 11,
+			clientY: 11
+		});
+		
+		equals(img.getAttribute('src'), 'test2.png', 'should update the src of the image to test2.png');
+	});
+	
+	test('Clicked outside hotspot', function(){
+		expect(1);
+		
+		new Slide('test.png')
+			.click(10, 10, 10, 10)
+			.open('test2.png');
+		var img = document.getElementById('slide');
+		img.simulate('click', {
+			clientX: 9,
+			clientY: 9
+		});
+		
+		equals(img.getAttribute('src'), 'test.png', 'src of image should still be test.png');
+	});
+	
+	test('Clicking multiple hotspots', function(){
+		expect(2);
+		
+		new Slide('test.png')
+			.click(10, 10, 10, 10)
+			.open('test2.png');
+		new Slide('test2.png')
+			.click(20, 20, 20, 20)
+			.open('test3.png');
+		var img = document.getElementById('slide')
+		img.simulate('click', {
+			clientX: 11,
+			clientY: 11
+		});
+
+		equals(img.getAttribute('src'), 'test2.png', 'src of image should be test2.png');
+		
+		img.simulate('click', {
+			clientX: 21,
+			clientY: 21
+		});
+		
+		equals(img.getAttribute('src'), 'test3.png', 'src of image should be test3.png');
+	});
+	
+	// .pause()
+	module('.pause()', {teardown: function(){ Slide.resetAll(); }});
 
 	test('Returns instance', function(){
+		expect(1);		
+		
 		var slide = new Slide('test.png');
 
 		ok((slide instanceof Slide), 'should return an instance of Slide');
 	});
 
 	test('Default pause', function(){
+		expect(1);		
+		
 		var start = new Date().valueOf();
-
 		new Slide('test.png')
 			.pause();
-
 		var end = new Date().valueOf();
 
 		ok((end - start >= 500), 'should take no less that 500ms to complete: '+(end-start)+'ms');
 	});
 
 	test('Custom pause', function(){
+		expect(1);		
+		
 		var start = new Date().valueOf();
-
 		new Slide('test.png')
 			.pause(1);
-
 		var end = new Date().valueOf();
 
 		ok((end - start >= 1000), 'should take no less than than 1000ms to complete: '+(end-start)+'ms');
 	});
 
-	module('.open', {teardown: function(){ Slide.resetAll(); }});
+	// .open()
+	module('.open()', {teardown: function(){ Slide.resetAll(); }});
 
 	test('Returns instance', function(){
+		expect(1);		
+		
 		var slide = new Slide('test.png');
 
 		ok((slide instanceof Slide), 'should return an instance of Slide');
 	});
 
 	test('Opening image', function(){
+		expect(1);
+				
 		new Slide('test.png')
 			.open('test2.png');
-
-		var img = document.getElementsByTagName('img')[0];
+		var img = document.getElementById('slide')
+		
 		equals(img.getAttribute('src'), 'test2.png', 'should update the src of the image');
 	});
 
 	test('Image not opened until requested', function(){
+		expect(1);
+				
 		new Slide('test.png')
 			.click()
 				.open('test2.png');
-
-		var img = document.getElementsByTagName('img')[0];
+		var img = document.getElementById('slide')
 
 		ok((img.getAttribute('src') != 'test2.png'), 'src should not be test2.png');
 	});
 
 	test('Multiple Slides chain', function(){
+		expect(1);
+				
 		new Slide('test.png')
 			.click()
 				.open('test2.png');
-		
 		new Slide('test2.png')
 			.click()
 				.open('test3.png');
-		
-		var img = document.getElementsByTagName('img')[0];
+		var img = document.getElementById('slide')
 		img.simulate('click');
 		img.simulate('click');
+
 		equals(img.getAttribute('src'), 'test3.png', 'src should be test3.png');
 	});
 

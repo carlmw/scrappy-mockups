@@ -1,3 +1,11 @@
+/*!
+ * Scrappy UI
+ * http://sweetnr.com/scrappy
+ *
+ * Copyright 2010, Carl Whittaker
+ * Distributed under the MIT license.
+ * http://sweetnr.com/scrappy/license
+ */
 window['Slide'] = (function() {
 	var Event = (function() {
 		var init = function(type, src) {
@@ -29,6 +37,7 @@ window['Slide'] = (function() {
 				image.parentNode.removeChild(image);
 			}, false);
 			image.src = src;
+			image.style.display = 'none';
 			document.body.appendChild(image);
 		},
 		fire = function(src, type) {
@@ -42,6 +51,7 @@ window['Slide'] = (function() {
 		init = function(src) {
 			if (!image) {
 				image = document.createElement('img');
+				image.id = 'slide';
 				activeSrc = image.src = src;
 				document.body.appendChild(image);
 
@@ -49,8 +59,8 @@ window['Slide'] = (function() {
 					fire(activeSrc, 'click');
 				}, false);
 			}else{
-			//	var pre = document.createElement('img');
-			//	pre.src = src;
+				//Preload our image to avoid white screening
+				preload(src);
 			}
 			this.src = src;
 		};
@@ -80,6 +90,7 @@ window['Slide'] = (function() {
 				}
 			},
 			open: function(src) {
+				preload(src);
 				this.add(function() {
 					activeSrc = image.src = src;
 				});
@@ -90,7 +101,7 @@ window['Slide'] = (function() {
 				return this;
 			},
 			pause: function(duration) {
-				var duration = (duration) ? duration * 1000 : 500;
+				var ms = (duration) ? duration * 1000 : 500;
 
 				this.add(function() {
 					var start = new Date(),
@@ -99,7 +110,7 @@ window['Slide'] = (function() {
 					do {
 						now = new Date();
 					}
-					while (now - start < duration);
+					while (now - start < ms);
 				});
 
 				return this;
